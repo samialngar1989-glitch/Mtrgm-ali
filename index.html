@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام USUR المطور - اكتشاف ذكي</title>
+    <title>نظام USUR المطور - التبديل الذكي</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -27,6 +27,29 @@
             border: 2px solid #002349;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+        
+        /* مفتاح التبديل الجديد */
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .switch-label {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #002349;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            border: 2px solid transparent;
+        }
+        .switch-label.active {
+            background: #4da6ff;
+            color: #001a33;
+            border-color: #ffffff;
+        }
+
         .pulse-btn {
             width: 70px;
             height: 70px;
@@ -38,6 +61,7 @@
             cursor: pointer;
             margin: 0 auto 15px;
             flex-shrink: 0;
+            transition: 0.3s;
         }
         .active-pulse {
             background: #d9534f !important;
@@ -69,18 +93,29 @@
         .ltr { direction: ltr; text-align: left; }
         .rtl { direction: rtl; text-align: right; }
         .status { font-size: 13px; color: #4da6ff; margin-bottom: 10px; text-align: center; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2 style="color: #4da6ff; text-align: center; margin-top: 0;">💠 مترجم USUR الذكي</h2>
-    <div id="status" class="status">جاهز للترجمة المزدوجة...</div>
+    
+    <div class="lang-switch">
+        <div id="btnAr" class="switch-label active" onclick="setLang('ar-SA')">تكلم بالعربية 🇸🇦</div>
+        <div id="btnEn" class="switch-label" onclick="setLang('en-US')">Speak English 🇺🇸</div>
+    </div>
+
+    <div id="status" class="status">جاهز للترجمة.. اختر لغتك وتحدث</div>
     
     <button id="recordBtn" class="pulse-btn">🎤</button>
 
     <div id="translationLog">
-        <p style="color: #555; text-align: center;">سجل الترجمة يظهر هنا تباعاً...</p>
+        <p style="color: #888; text-align: center;">سجل الترجمة يظهر هنا...</p>
     </div>
 </div>
 
@@ -88,25 +123,50 @@
     const recordBtn = document.getElementById('recordBtn');
     const translationLog = document.getElementById('translationLog');
     const status = document.getElementById('status');
+    const btnAr = document.getElementById('btnAr');
+    const btnEn = document.getElementById('btnEn');
 
     let isListening = false;
+    let currentInputLang = 'ar-SA'; // اللغة الافتراضية
+
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new Recognition();
 
     recognition.continuous = true;
     recognition.interimResults = false;
-    
-    // الحل: المتصفحات تدعم لغات متعددة كقائمة في بعض الأنظمة، 
-    // ولكن الأضمن هو استخدام لغة عالمية أو التبديل بناءً على السياق
-    recognition.lang = 'ar-SA'; 
+
+    // دالة تغيير اللغة
+    function setLang(lang) {
+        currentInputLang = lang;
+        recognition.lang = lang;
+        
+        // تحديث شكل الأزرار
+        if(lang === 'ar-SA') {
+            btnAr.classList.add('active');
+            btnEn.classList.remove('active');
+            status.innerText = "تم ضبط المدخلات على العربية";
+        } else {
+            btnEn.classList.add('active');
+            btnAr.classList.remove('active');
+            status.innerText = "Input set to English";
+        }
+
+        // إذا كان التسجيل شغالاً، نقوم بإعادة تشغيله لتطبيق اللغة الجديدة
+        if (isListening) {
+            recognition.stop();
+            setTimeout(() => recognition.start(), 300);
+        }
+    }
+
+    // الضبط الأولي
+    recognition.lang = currentInputLang;
 
     recordBtn.onclick = () => {
         if (!isListening) {
             recognition.start();
             isListening = true;
             recordBtn.classList.add('active-pulse');
-            status.innerText = "أسمعك الآن.. تكلم بالعربية أو الإنجليزية";
-            translationLog.innerHTML = "";
+            status.innerText = currentInputLang === 'ar-SA' ? "أسمعك الآن..." : "Listening...";
         } else {
             recognition.stop();
             isListening = false;
@@ -118,20 +178,17 @@
     recognition.onresult = async (event) => {
         const transcript = event.results[event.results.length - 1][0].transcript.trim();
         
-        // منطق متطور لاكتشاف اللغة
-        // نتحقق من وجود حروف إنجليزية بنسبة معينة في الجملة
-        const hasEnglish = /[a-zA-Z]/.test(transcript);
-        
-        let langPair, speechLang, isSourceEn;
+        let langPair, speechOutputLang, isSourceEn;
 
-        if (hasEnglish) {
-            langPair = "en|ar"; // من إنجليزي لعربي
-            speechLang = "ar-SA"; // نطق الترجمة بالعربية
-            isSourceEn = true;
-        } else {
-            langPair = "ar|en"; // من عربي لإنجليزي
-            speechLang = "en-US"; // نطق الترجمة بالإنجليزية
+        // تحديد مسار الترجمة بناءً على اللغة المختارة حالياً
+        if (currentInputLang === 'ar-SA') {
+            langPair = "ar|en";
+            speechOutputLang = "en-US";
             isSourceEn = false;
+        } else {
+            langPair = "en|ar";
+            speechOutputLang = "ar-SA";
+            isSourceEn = true;
         }
 
         try {
@@ -139,18 +196,16 @@
             const data = await res.json();
             let translatedText = data.responseData.translatedText;
 
-            // منع الترجمة لنفس اللغة (إذا كانت النتيجة مطابقة للأصل)
-            if (translatedText.toLowerCase() === transcript.toLowerCase()) {
-                status.innerText = "جاري محاولة ترجمة بديلة...";
+            // إذا فشلت الترجمة أو أعاد نفس النص
+            if (translatedText.toLowerCase() === transcript.toLowerCase() && !isSourceEn) {
                 return; 
             }
 
-            addEntryToLog(transcript, translatedText, isSourceEn);
+            // مسح رسالة الترحيب عند أول نتيجة
+            if(translationLog.querySelector('p')) translationLog.innerHTML = "";
 
-            // نطق الترجمة فوراً لتقليل الفارق الزمني (ثانية واحدة)
-            setTimeout(() => {
-                speak(translatedText, speechLang);
-            }, 1000);
+            addEntryToLog(transcript, translatedText, isSourceEn);
+            speak(translatedText, speechOutputLang);
 
         } catch (error) {
             console.error("خطأ في الترجمة:", error);
@@ -168,13 +223,15 @@
             <div class="source-text ${sourceDir}">${isSourceEn ? '🇺🇸' : '🇸🇦'} ${source}</div>
             <div class="target-text ${targetDir}">${isSourceEn ? '🇸🇦' : '🇺🇸'} ${target}</div>
         `;
-        translationLog.appendChild(entry);
-        translationLog.scrollTop = translationLog.scrollHeight;
+        translationLog.prepend(entry); // الإضافة في الأعلى لسهولة الرؤية
+        translationLog.scrollTop = 0;
     }
 
     function speak(text, lang) {
+        window.speechSynthesis.cancel(); // إلغاء أي نطق سابق لتجنب التداخل
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang;
+        utterance.rate = 0.9; // سرعة هادئة قليلاً للوضوح
         window.speechSynthesis.speak(utterance);
     }
 
