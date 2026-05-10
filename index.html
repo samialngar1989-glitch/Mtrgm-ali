@@ -3,20 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام USUR المطور - التبديل الذكي</title>
+    <title>نظام USUR المطور - الإصدار الاحترافي</title>
     <style>
+        :root {
+            --bg-body: #001a33;
+            --bg-container: #2c445e;
+            --bg-log: rgba(0, 0, 0, 0.3);
+            --text-main: white;
+            --accent-color: #4da6ff;
+            --entry-bg: rgba(255, 255, 255, 0.05);
+            --border-color: #002349;
+        }
+
+        /* الثيم الفاتح */
+        .light-theme {
+            --bg-body: #f0f4f8;
+            --bg-container: #ffffff;
+            --bg-log: #f9f9f9;
+            --text-main: #2c3e50;
+            --accent-color: #007bff;
+            --entry-bg: #ffffff;
+            --border-color: #d1d9e6;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: #001a33;
-            color: white;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            transition: all 0.3s ease;
         }
+
         .container {
-            background-color: #2c445e;
+            background-color: var(--bg-container);
             padding: 25px;
             border-radius: 20px;
             width: 95%;
@@ -24,218 +47,243 @@
             height: 85vh;
             display: flex;
             flex-direction: column;
-            border: 2px solid #002349;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
         }
-        
-        /* مفتاح التبديل الجديد */
+
+        /* زر الثيم */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--border-color);
+            border: none;
+            color: var(--text-main);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
         .lang-switch {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
             gap: 10px;
+            margin-top: 20px;
         }
+
         .switch-label {
-            padding: 8px 15px;
+            padding: 10px 18px;
             border-radius: 20px;
-            background: #002349;
+            background: var(--border-color);
             cursor: pointer;
             transition: 0.3s;
             font-weight: bold;
-            border: 2px solid transparent;
+            font-size: 14px;
         }
+
         .switch-label.active {
-            background: #4da6ff;
-            color: #001a33;
-            border-color: #ffffff;
+            background: var(--accent-color);
+            color: white;
         }
 
         .pulse-btn {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
             border: none;
-            background: #002349;
+            background: var(--accent-color);
             color: white;
-            font-size: 25px;
+            font-size: 30px;
             cursor: pointer;
             margin: 0 auto 15px;
             flex-shrink: 0;
-            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
+
         .active-pulse {
             background: #d9534f !important;
             animation: pulse-red 1.5s infinite;
         }
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(217, 83, 79, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
-        }
+
         #translationLog {
             flex-grow: 1;
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--bg-log);
             border-radius: 15px;
             padding: 20px;
             overflow-y: auto;
-            border: 1px solid rgba(77, 166, 255, 0.2);
+            border: 1px solid var(--border-color);
         }
+
         .log-entry {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px;
-            border-radius: 10px;
+            background: var(--entry-bg);
+            padding: 15px;
+            border-radius: 12px;
             margin-bottom: 12px;
-            border-right: 4px solid #4da6ff;
-            animation: fadeIn 0.4s ease;
+            border-right: 5px solid var(--accent-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease;
         }
-        .source-text { font-size: 1em; color: #bdc3c7; margin-bottom: 4px; }
+
+        .source-text { font-size: 0.95em; opacity: 0.8; margin-bottom: 5px; }
         .target-text { font-size: 1.2em; color: #ffcc00; font-weight: bold; }
+        .light-theme .target-text { color: #d97706; }
+
         .ltr { direction: ltr; text-align: left; }
         .rtl { direction: rtl; text-align: right; }
-        .status { font-size: 13px; color: #4da6ff; margin-bottom: 10px; text-align: center; }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .clear-btn {
+            background: transparent;
+            border: none;
+            color: #d9534f;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            text-decoration: underline;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.6); }
+            70% { box-shadow: 0 0 0 20px rgba(217, 83, 79, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="color: #4da6ff; text-align: center; margin-top: 0;">💠 مترجم USUR الذكي</h2>
+    <button class="theme-toggle" id="themeBtn" title="تبديل الثيم">🌙</button>
+    
+    <h2 style="color: var(--accent-color); text-align: center; margin-top: 10px;">💠 نظام USUR الذكي</h2>
     
     <div class="lang-switch">
-        <div id="btnAr" class="switch-label active" onclick="setLang('ar-SA')">تكلم بالعربية 🇸🇦</div>
-        <div id="btnEn" class="switch-label" onclick="setLang('en-US')">Speak English 🇺🇸</div>
+        <div id="btnAr" class="switch-label active" onclick="setLang('ar-SA')">العربية 🇸🇦</div>
+        <div id="btnEn" class="switch-label" onclick="setLang('en-US')">English 🇺🇸</div>
     </div>
 
-    <div id="status" class="status">جاهز للترجمة.. اختر لغتك وتحدث</div>
+    <div id="status" style="text-align: center; font-size: 13px; margin-bottom: 10px; opacity: 0.7;">جاهز للاستماع...</div>
     
     <button id="recordBtn" class="pulse-btn">🎤</button>
 
-    <div id="translationLog">
-        <p style="color: #888; text-align: center;">سجل الترجمة يظهر هنا...</p>
-    </div>
+    <div id="translationLog"></div>
+    <button class="clear-btn" onclick="clearHistory()">مسح السجل بالكامل</button>
 </div>
 
 <script>
     const recordBtn = document.getElementById('recordBtn');
     const translationLog = document.getElementById('translationLog');
-    const status = document.getElementById('status');
-    const btnAr = document.getElementById('btnAr');
-    const btnEn = document.getElementById('btnEn');
+    const themeBtn = document.getElementById('themeBtn');
+    const body = document.body;
 
     let isListening = false;
-    let currentInputLang = 'ar-SA'; // اللغة الافتراضية
+    let currentInputLang = 'ar-SA';
 
-    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new Recognition();
+    // 1. إدارة السجل (LocalStorage)
+    let history = JSON.parse(localStorage.getItem('usur_history')) || [];
 
-    recognition.continuous = true;
-    recognition.interimResults = false;
+    function saveToHistory(source, target, isSourceEn) {
+        history.unshift({ source, target, isSourceEn, time: new Date().getTime() });
+        localStorage.setItem('usur_history', JSON.stringify(history));
+        renderLog();
+    }
 
-    // دالة تغيير اللغة
-    function setLang(lang) {
-        currentInputLang = lang;
-        recognition.lang = lang;
-        
-        // تحديث شكل الأزرار
-        if(lang === 'ar-SA') {
-            btnAr.classList.add('active');
-            btnEn.classList.remove('active');
-            status.innerText = "تم ضبط المدخلات على العربية";
-        } else {
-            btnEn.classList.add('active');
-            btnAr.classList.remove('active');
-            status.innerText = "Input set to English";
+    function renderLog() {
+        if (history.length === 0) {
+            translationLog.innerHTML = '<p style="text-align:center; opacity:0.5;">لا يوجد سجل ترجمة حالياً</p>';
+            return;
         }
+        translationLog.innerHTML = history.map(item => `
+            <div class="log-entry">
+                <div class="source-text ${item.isSourceEn ? 'ltr' : 'rtl'}">${item.isSourceEn ? '🇺🇸' : '🇸🇦'} ${item.source}</div>
+                <div class="target-text ${item.isSourceEn ? 'rtl' : 'ltr'}">${item.isSourceEn ? '🇸🇦' : '🇺🇸'} ${item.target}</div>
+            </div>
+        `).join('');
+    }
 
-        // إذا كان التسجيل شغالاً، نقوم بإعادة تشغيله لتطبيق اللغة الجديدة
-        if (isListening) {
-            recognition.stop();
-            setTimeout(() => recognition.start(), 300);
+    function clearHistory() {
+        if(confirm('هل تريد مسح السجل فعلاً؟')) {
+            history = [];
+            localStorage.removeItem('usur_history');
+            renderLog();
         }
     }
 
-    // الضبط الأولي
+    // 2. إدارة الثيم
+    let isDark = true;
+    themeBtn.onclick = () => {
+        isDark = !isDark;
+        body.classList.toggle('light-theme');
+        themeBtn.innerText = isDark ? '🌙' : '☀️';
+        localStorage.setItem('usur_theme', isDark ? 'dark' : 'light');
+    };
+
+    // استعادة الثيم المفضل
+    if (localStorage.getItem('usur_theme') === 'light') {
+        isDark = false;
+        body.classList.add('light-theme');
+        themeBtn.innerText = '☀️';
+    }
+
+    // 3. منطق الترجمة (محسّن)
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new Recognition();
+    recognition.continuous = true;
     recognition.lang = currentInputLang;
+
+    function setLang(lang) {
+        currentInputLang = lang;
+        recognition.lang = lang;
+        document.querySelectorAll('.switch-label').forEach(el => el.classList.remove('active'));
+        lang === 'ar-SA' ? document.getElementById('btnAr').classList.add('active') : document.getElementById('btnEn').classList.add('active');
+        if (isListening) { recognition.stop(); setTimeout(() => recognition.start(), 300); }
+    }
 
     recordBtn.onclick = () => {
         if (!isListening) {
             recognition.start();
             isListening = true;
             recordBtn.classList.add('active-pulse');
-            status.innerText = currentInputLang === 'ar-SA' ? "أسمعك الآن..." : "Listening...";
         } else {
             recognition.stop();
             isListening = false;
             recordBtn.classList.remove('active-pulse');
-            status.innerText = "توقف الاستماع.";
         }
     };
 
     recognition.onresult = async (event) => {
         const transcript = event.results[event.results.length - 1][0].transcript.trim();
-        
-        let langPair, speechOutputLang, isSourceEn;
-
-        // تحديد مسار الترجمة بناءً على اللغة المختارة حالياً
-        if (currentInputLang === 'ar-SA') {
-            langPair = "ar|en";
-            speechOutputLang = "en-US";
-            isSourceEn = false;
-        } else {
-            langPair = "en|ar";
-            speechOutputLang = "ar-SA";
-            isSourceEn = true;
-        }
+        const langPair = currentInputLang === 'ar-SA' ? "ar|en" : "en|ar";
+        const speechOutputLang = currentInputLang === 'ar-SA' ? "en-US" : "ar-SA";
 
         try {
             const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(transcript)}&langpair=${langPair}`);
             const data = await res.json();
-            let translatedText = data.responseData.translatedText;
+            const translatedText = data.responseData.translatedText;
 
-            // إذا فشلت الترجمة أو أعاد نفس النص
-            if (translatedText.toLowerCase() === transcript.toLowerCase() && !isSourceEn) {
-                return; 
-            }
-
-            // مسح رسالة الترحيب عند أول نتيجة
-            if(translationLog.querySelector('p')) translationLog.innerHTML = "";
-
-            addEntryToLog(transcript, translatedText, isSourceEn);
-            speak(translatedText, speechOutputLang);
-
-        } catch (error) {
-            console.error("خطأ في الترجمة:", error);
-        }
+            saveToHistory(transcript, translatedText, currentInputLang === 'en-US');
+            
+            const utterance = new SpeechSynthesisUtterance(translatedText);
+            utterance.lang = speechOutputLang;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) { console.error("Error:", e); }
     };
 
-    function addEntryToLog(source, target, isSourceEn) {
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
-        
-        const sourceDir = isSourceEn ? 'ltr' : 'rtl';
-        const targetDir = isSourceEn ? 'rtl' : 'ltr';
-
-        entry.innerHTML = `
-            <div class="source-text ${sourceDir}">${isSourceEn ? '🇺🇸' : '🇸🇦'} ${source}</div>
-            <div class="target-text ${targetDir}">${isSourceEn ? '🇸🇦' : '🇺🇸'} ${target}</div>
-        `;
-        translationLog.prepend(entry); // الإضافة في الأعلى لسهولة الرؤية
-        translationLog.scrollTop = 0;
-    }
-
-    function speak(text, lang) {
-        window.speechSynthesis.cancel(); // إلغاء أي نطق سابق لتجنب التداخل
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang;
-        utterance.rate = 0.9; // سرعة هادئة قليلاً للوضوح
-        window.speechSynthesis.speak(utterance);
-    }
-
     recognition.onend = () => { if (isListening) recognition.start(); };
+
+    // تشغيل السجل عند البدء
+    renderLog();
 </script>
 
 </body>
